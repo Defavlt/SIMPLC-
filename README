@@ -1,0 +1,16 @@
+** SIMPLC# **
+** SIMPLC- **
+
+TODO:
+	README:
+	- Add syntax rules for project (in this file)
+	- Add requirement for adding new patches in this file (README), see below.
+	- Start ninj.. err, writing code.
+	
+Syntax:
+
+Patches:
+	README:
+	- DO NOT ADD FOR THIS FILE
+	Program.cs:
+	- 120208: Marcus
