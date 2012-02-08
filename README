@@ -12,5 +12,18 @@ Syntax:
 Patches:
 	README:
 	- DO NOT ADD FOR THIS FILE
-	Program.cs:
+	Project:
 	- 120208: Marcus
+	- 120209: Marcus
+	
+Notes:
+
+	120209: Marcus:
+		Added files 
+			-Assembly
+			-MNEMONICS
+			-REGISTERS
+		TODO:
+		* Unbreak build (No, I'm serious).
+		* Re-structure and -factor.
+		* Clean up in syntax and among redudant and/or useless methods.
