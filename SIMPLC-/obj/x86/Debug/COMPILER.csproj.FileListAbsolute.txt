@@ -1,0 +1,5 @@
+K:\SIMPLC-\SIMPLC-\bin\Debug\SIMPLC-.exe
+K:\SIMPLC-\SIMPLC-\bin\Debug\SIMPLC-.pdb
+K:\SIMPLC-\SIMPLC-\obj\x86\Debug\ResolveAssemblyReference.cache
+K:\SIMPLC-\SIMPLC-\obj\x86\Debug\SIMPLC-.exe
+K:\SIMPLC-\SIMPLC-\obj\x86\Debug\SIMPLC-.pdb

@@ -20,7 +20,7 @@ namespace SIMPLC_
 				FileStream fileReader = File.OpenRead(source);
 				FileStream fileWriter = File.OpenWrite(output);
 
-				new Assembler(fileReader, fileWriter, origin);
+				new ASSEMBLER(null, null, null, true);
 			}
 
 			else

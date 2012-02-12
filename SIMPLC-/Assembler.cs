@@ -2,77 +2,99 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Collections;
 using System.IO;
+using System.Collections;
 
 namespace SIMPLC_
 {
-	class Assembler
+	class ASSEMBLER
 	{
-		private TextReader fileTextReader;
+		private static char[] MAGIC_HEADER = new char[] { 'B', '3', '2' };
+		private static ushort MAGIC_START = Convert.ToUInt16("1000", 16);
+		private static string MAGIC_FILE_IN = "IN.ASM";
+		private static string MAGIC_FILE_OUT = "out.b32";
 
-		private StreamReader input;
+		//Should it be compile-time or run-time?
+		//If compile-time we need to bake assets in project
+		private static bool __DEBUG = false;
+
+		#region Private members
+
 		private BinaryWriter output;
-		private string fileStart;
-		private Hashtable LabelTable;
-		private bool isEnd;
 
-		private int CurrentNdx;
+		private string Source;
 		private ushort AsLength;
 		private ushort ExecutionAddress;
-		private string Source;
 
-		public Assembler( FileStream fileReader,FileStream fileWriter, string fileStart )
+		private int CurrentNdx;
+		private bool IsEnd;
+
+		private Hashtable LabelTable;
+
+		private char CurrentChr
 		{
-			// TODO: Complete member initialization
-			Console.WriteLine("Initializing..");
-			this.input = new StreamReader(fileReader);
-			this.output = new BinaryWriter(fileWriter);
-
-			this.LabelTable = new Hashtable( );
-			this.isEnd = false;
-			this.CurrentNdx = 0;
-			this.AsLength = 0;
-			this.ExecutionAddress = 0;
-
-			Console.WriteLine("Starting write..");
-			this.Initialize( fileStart );
-			Console.WriteLine("Write ended, Sucess!");
+			get
+			{
+				return this.Source[this.CurrentNdx];
+			}
 		}
 
-		public void Initialize( string startAddress )
+		#endregion
+
+		public ASSEMBLER(
+			string infile, 
+			string outfile, 
+			string startADDR,
+			bool __DEBUG )
 		{
-			this.AsLength = Convert.ToUInt16(startAddress, 16);
+			ASSEMBLER.__DEBUG = __DEBUG;
+			infile = __DEBUG ? ASSEMBLER.MAGIC_FILE_IN : infile;
+			outfile = __DEBUG ? ASSEMBLER.MAGIC_FILE_OUT : infile;
+			startADDR = __DEBUG ? "1000" : startADDR;
 
-			this.Source = this.input.ReadToEnd( );
-			this.input.Close( );
+			this.output = new BinaryWriter(File.Create(outfile));
+			this.LabelTable = new Hashtable( );
+			this.IsEnd = false;
+			this.CurrentNdx = 0;
+			this.ExecutionAddress = 0;
+			this.Source = null;
 
-			this.output.Write('B');
-			this.output.Write('3');
-			this.output.Write('2');
+			this.AsLength = ASSEMBLER.MAGIC_START;
+
+			using ( StreamReader input = new StreamReader(File.Open(infile, FileMode.Open)) )
+			{
+				this.Source = input.ReadToEnd( );
+				input.Close();
+				Console.Write(this.Source);
+			}
+
+			this.output.Write(ASSEMBLER.MAGIC_HEADER);
 			this.output.Write(this.AsLength);
 			this.output.Write((ushort) 0);
-			this.Parse();
+
+			this.Parse( startADDR );
 
 			this.output.Seek(5, SeekOrigin.Begin);
 			this.output.Write(this.ExecutionAddress);
 			this.output.Close( );
-
 		}
 
-		private void Parse( )
+		#region Parsing & Tokenizing
+
+		private void Parse( string startADDR )
 		{
 			this.CurrentNdx = 0;
 
-			while ( !this.isEnd )
+			while ( !this.IsEnd )
 			{
 				this.LabelScan(true);
 			}
 
-			this.isEnd = false;
+			this.IsEnd = false;
 			this.CurrentNdx = 0;
+			this.AsLength = ASSEMBLER.MAGIC_START;
 
-			while ( !this.isEnd )
+			while ( !this.IsEnd )
 			{
 				this.LabelScan(false);
 			}
@@ -80,9 +102,16 @@ namespace SIMPLC_
 
 		private void LabelScan( bool isLabelScan )
 		{
-			if ( char.IsLetter(this.Source[this.CurrentNdx]) )
+			if ( char.IsLetter(this.CurrentChr) )
 			{
-				while ( this.Source[this.CurrentNdx] != '\n' )
+				if ( isLabelScan )
+				{
+					this.LabelTable.Add(
+						this.GetLabelName( ),
+						this.AsLength);
+				}
+
+				while ( this.CurrentChr != '\n' )
 				{
 					this.CurrentNdx++;
 				}
@@ -91,42 +120,45 @@ namespace SIMPLC_
 				return;
 			}
 
-			this.EatWhiteSpaces( );
-			this.ReadMnemonic( isLabelScan );
+			else
+			{
+				this.EatWhiteSpaces( );
+				this.ReadMnemonic(isLabelScan);
+			}
 		}
 
 		private void ReadMnemonic( bool isLabelScan )
 		{
-			//Stop shouting at me stupid compiler
 			string mnemonic = null;
 
-			while ( !(char.IsWhiteSpace(this.Source[this.CurrentNdx])) )
+			while ( !(char.IsWhiteSpace(this.CurrentChr)) )
 			{
-				mnemonic += this.Source[this.CurrentNdx];
+				mnemonic += this.CurrentChr;
 				this.CurrentNdx++;
 			}
 
-			mnemonic = mnemonic.ToUpper( );
-
-			switch ( mnemonic )
+			switch ( C_MNEMONICS.F_GET(mnemonic.ToUpper()) )
 			{
-				case C_MNEMONICS.C_LDA:
-					this.InterpretMnemonic(E_MNEMONIC.LDA, isLabelScan);
+				case E_MNEMONIC.LDA:
+					this.LDA(isLabelScan);
 					break;
-				case C_MNEMONICS.C_LDX:
-					this.InterpretMnemonic(E_MNEMONIC.LDX, isLabelScan);
+				case E_MNEMONIC.LDX:
+					this.LDX(isLabelScan);
 					break;
-				case C_MNEMONICS.C_STA:
-					this.InterpretMnemonic(E_MNEMONIC.STA, isLabelScan);
+				case E_MNEMONIC.STA:
+					this.STA(isLabelScan);
 					break;
-				case C_MNEMONICS.C_END:
-					this.DoEnd(isLabelScan);
-					this.EatWhiteSpaces( );
-					this.ExecutionAddress = (ushort) this.LabelTable[( this.GetLabelName( ) )];
-					return;
+				case E_MNEMONIC.END:
+					this.END(isLabelScan);
+					break;
+				case E_MNEMONIC.ADD:
+					this.ADD(isLabelScan);
+					break;
+				default:
+					break;
 			}
 
-			while ( this.Source[this.CurrentNdx] != '\n' )
+			while ( this.CurrentChr != '\n' )
 			{
 				this.CurrentNdx++;
 			}
@@ -134,86 +166,146 @@ namespace SIMPLC_
 			this.CurrentNdx++;
 		}
 
-		private void InterpretMnemonic(E_MNEMONIC MNE, bool isLabelScan)
+		#endregion
+
+		#region Mnemonics
+
+		/// <summary>
+		/// End function and set execution at LABEL
+		/// </summary>
+		/// <param name="isLabelScan"></param>
+		private void END( bool isLabelScan )
 		{
-			switch ( MNE )
+			this.IsEnd = true;
+			this.DoEnd(isLabelScan);
+			this.EatWhiteSpaces( );
+			this.ExecutionAddress =
+				(ushort) this.LabelTable[this.GetLabelName( )];
+			return;
+		}
+
+		/// <summary>
+		/// Mnemonic: Store register A at location
+		/// Interprets mnemonic, value and location
+		/// <note>This is first 8 bit of X</note>
+		/// </summary>
+		/// <param name="isLabelScan"></param>
+		private void STA( bool isLabelScan )
+		{
+			this.EatWhiteSpaces( );
+
+			if ( this.CurrentChr == ',' )
 			{
-				case E_MNEMONIC.LDA:
-					this.EatWhiteSpaces( );
+				E_REGISTERS R;
+				byte opcode = 0x00;
 
-					if ( this.Source[this.CurrentNdx] == '#' )
-					{
-						this.CurrentNdx++;
-						byte val = this.ReadByteValue( );
-						this.AsLength += 2;
+				this.CurrentNdx++;
+				this.EatWhiteSpaces( );
 
-						if ( !isLabelScan )
-						{
-							this.output.Write((byte) C_MNEMONICS.S_LDX.value);
-							this.output.Write(val);
-						}
-					}
-					break;
-				case E_MNEMONIC.LDX:
-					this.EatWhiteSpaces( );
+				R = ReadRegister( );
 
-					if ( this.Source[this.CurrentNdx] == '#' )
-					{
-						this.CurrentNdx++;
-						ushort val = this.ReadWordValue( );
-						this.AsLength += 3;
+				switch ( R )
+				{
+					case E_REGISTERS.UNKNOWN:
+						break;
+					case E_REGISTERS.A:
+						break;
+					case E_REGISTERS.B:
+						break;
+					case E_REGISTERS.D:
+						break;
+					case E_REGISTERS.X:
+						opcode = 0x03;
+						break;
+					case E_REGISTERS.Y:
+						break;
+					default:
+						break;
+				}
 
-						if ( !isLabelScan )
-						{
-							this.output.Write((byte) C_MNEMONICS.S_LDX.value);
-							this.output.Write(val);
-						}
-					}
-					break;
-				case E_MNEMONIC.STA:
-					this.EatWhiteSpaces( );
+				this.AsLength += 1;
 
-					if ( this.Source[this.CurrentNdx] == ',' )
-					{
-						E_REGISTERS r;
-						byte opcode = 0x00;
-
-						this.CurrentNdx++;
-						this.EatWhiteSpaces( );
-						r = this.ReadRegister( );
-
-						switch ( r )
-						{
-							case E_REGISTERS.Unknown:
-								break;
-							case E_REGISTERS.A:
-								break;
-							case E_REGISTERS.B:
-								break;
-							case E_REGISTERS.D:
-								break;
-							case E_REGISTERS.X:
-								opcode = 0x03;
-								break;
-							case E_REGISTERS.Y:
-								break;
-							default:
-								break;
-						}
-
-						this.AsLength += 1;
-
-						if ( isLabelScan )
-						{
-							this.output.Write(opcode);
-						}
-					}
-					break;
-				default:
-					break;
+				if ( !isLabelScan )
+				{
+					this.output.Write(opcode);
+				}
 			}
 		}
 
+		/// <summary>
+		/// Mnemonic: Load Register X
+		/// Interprets mnemonic and value
+		/// <note>X is 16-bit/2-byte pointer</note>
+		/// </summary>
+		/// <param name="isLabelScan"></param>
+		private void LDX( bool isLabelScan )
+		{
+			this.EatWhiteSpaces( );
+
+			if ( this.CurrentChr == '#' )
+			{
+				this.CurrentNdx++;
+
+				ushort val = this.ReadWordValue( );
+				this.AsLength += 3;
+
+				if ( !isLabelScan )
+				{
+					this.output.Write((byte) 0x02);
+					this.output.Write(val);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Mnemonic: Load register A
+		/// Interprets mnemonic and value
+		/// </summary>
+		/// <param name="isLabelScan"></param>
+		private void LDA( bool isLabelScan )
+		{
+			this.EatWhiteSpaces( );
+
+			if ( this.CurrentChr == '#' )
+			{
+				this.CurrentNdx++;
+
+				byte val = this.ReadByteValue( );
+				this.AsLength += 2;
+
+				if ( !isLabelScan )
+				{
+					this.output.Write((byte) 0x01);
+					this.output.Write(val);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Mnemonic: Add value to location
+		/// </summary>
+		/// <param name="isLabelScan"></param>
+		private void ADD( bool isLabelScan )
+		{
+			this.EatWhiteSpaces( );
+
+			if ( this.CurrentChr == '#' )
+			{
+				byte val = this.ReadByteValue( );
+				this.AsLength += 2;
+
+				if ( !isLabelScan )
+				{
+					//Not implemented yet, but didn't want to
+					//break execution with an exception
+					this.output.Write((string) null);
+				}
+			}
+		}
+
+		#endregion
+
+		#region Util methods
 		private void DoEnd( bool isLabelScan )
 		{
 			this.AsLength++;
@@ -223,118 +315,98 @@ namespace SIMPLC_
 				this.output.Write((byte) 0x04);
 			}
 		}
-
 		private E_REGISTERS ReadRegister( )
 		{
-			int index = this.CurrentNdx;
+			E_REGISTERS R = C_REGISTERS.F_GET(this.CurrentChr);
 			this.CurrentNdx++;
 
-			switch ( this.Source[index] )
-			{
-				case C_REGISTERS.C_A:
-					return E_REGISTERS.A;
-				case C_REGISTERS.C_B:
-					return E_REGISTERS.B;
-				case C_REGISTERS.C_D:
-					return E_REGISTERS.D;
-				case C_REGISTERS.C_X:
-					return E_REGISTERS.X;
-				case C_REGISTERS.C_Y:
-					return E_REGISTERS.Y;
-				default:
-					return E_REGISTERS.Unknown;
-			}
+			return R;
 		}
-
 		private ushort ReadWordValue( )
 		{
 			ushort val = 0;
 			bool isHex = false;
-			string s_val = "";
+			string sval = null;
 
-			if ( this.Source[this.CurrentNdx] == '$' )
+			if ( this.CurrentChr == '$' )
 			{
 				this.CurrentNdx++;
 				isHex = true;
 			}
 
-			while ( char.IsLetterOrDigit(this.Source[this.CurrentNdx]) )
+			while ( char.IsLetterOrDigit(this.CurrentChr) )
 			{
-				s_val += this.Source[this.CurrentNdx];
+				sval += this.CurrentChr;
+				this.CurrentNdx++;
 			}
 
 			if ( isHex )
 			{
-				val = Convert.ToUInt16(s_val, 16);
+				val = Convert.ToUInt16(sval, 16);
 			}
 
 			else
 			{
-				val = ushort.Parse(s_val);
+				val = ushort.Parse(sval);
 			}
 
 			return val;
 		}
-
 		private byte ReadByteValue( )
 		{
 			byte val = 0;
 			bool isHex = false;
-			string s_val = "";
+			string sval = null;
 
-			if ( this.Source[this.CurrentNdx] == '$' )
+			if ( this.CurrentChr == '$' )
 			{
 				this.CurrentNdx++;
 				isHex = true;
 			}
 
-			while ( char.IsLetterOrDigit(this.Source[this.CurrentNdx]) )
+			while ( char.IsLetterOrDigit(this.CurrentChr) )
 			{
-				s_val += this.Source[this.CurrentNdx];
+				sval += this.CurrentChr;
 				this.CurrentNdx++;
 			}
 
 			if ( isHex )
 			{
-				val = Convert.ToByte(s_val, 16);
+				val = Convert.ToByte(sval, 16);
 			}
 
 			else
 			{
-				val = byte.Parse(s_val);
+				val = byte.Parse(sval);
 			}
 
 			return val;
-
 		}
-
 		private void EatWhiteSpaces( )
 		{
-			while ( char.IsWhiteSpace(this.Source[this.CurrentNdx]) )
+			while ( char.IsWhiteSpace(this.CurrentChr) )
 			{
 				this.CurrentNdx++;
 			}
 		}
-
 		private string GetLabelName( )
 		{
-			string label = "";
+			string lblname = null;
 
-			while ( char.IsLetterOrDigit(this.Source[this.CurrentNdx]) )
+			while ( char.IsLetterOrDigit(this.CurrentChr) )
 			{
-				if ( this.Source[this.CurrentNdx] == ':' )
+				if ( this.CurrentChr == ':' )
 				{
 					this.CurrentNdx++;
 					break;
 				}
 
-				label += this.Source[this.CurrentNdx];
+				lblname += this.CurrentChr;
 				this.CurrentNdx++;
 			}
 
-			return label.ToUpper( );
+			return lblname;
 		}
-	
+		#endregion
 	}
 }
-
