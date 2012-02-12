@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "COMPILER", "SIMPLC-\COMPILER.csproj", "{D1072035-FBD2-4B4D-9E46-639C681252D4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MACHINE", "MACHINE\MACHINE.csproj", "{83B97E0C-8494-4057-85C5-EAB93C702C82}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "COMPILER", "COMPILER\COMPILER.csproj", "{D1072035-FBD2-4B4D-9E46-639C681252D4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,14 +11,14 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D1072035-FBD2-4B4D-9E46-639C681252D4}.Debug|x86.ActiveCfg = Debug|x86
-		{D1072035-FBD2-4B4D-9E46-639C681252D4}.Debug|x86.Build.0 = Debug|x86
-		{D1072035-FBD2-4B4D-9E46-639C681252D4}.Release|x86.ActiveCfg = Release|x86
-		{D1072035-FBD2-4B4D-9E46-639C681252D4}.Release|x86.Build.0 = Release|x86
 		{83B97E0C-8494-4057-85C5-EAB93C702C82}.Debug|x86.ActiveCfg = Debug|x86
 		{83B97E0C-8494-4057-85C5-EAB93C702C82}.Debug|x86.Build.0 = Debug|x86
 		{83B97E0C-8494-4057-85C5-EAB93C702C82}.Release|x86.ActiveCfg = Release|x86
 		{83B97E0C-8494-4057-85C5-EAB93C702C82}.Release|x86.Build.0 = Release|x86
+		{D1072035-FBD2-4B4D-9E46-639C681252D4}.Debug|x86.ActiveCfg = Debug|x86
+		{D1072035-FBD2-4B4D-9E46-639C681252D4}.Debug|x86.Build.0 = Debug|x86
+		{D1072035-FBD2-4B4D-9E46-639C681252D4}.Release|x86.ActiveCfg = Release|x86
+		{D1072035-FBD2-4B4D-9E46-639C681252D4}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
