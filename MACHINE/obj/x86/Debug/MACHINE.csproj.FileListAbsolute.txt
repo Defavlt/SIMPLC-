@@ -1,8 +1,11 @@
+K:\SIMPLC-\MACHINE\bin\Debug\MACHINE.dll.config
+K:\SIMPLC-\MACHINE\bin\Debug\MACHINE.dll
+K:\SIMPLC-\MACHINE\bin\Debug\MACHINE.pdb
+K:\SIMPLC-\MACHINE\bin\Debug\DEBUG.dll
+K:\SIMPLC-\MACHINE\bin\Debug\DEBUG.pdb
 K:\SIMPLC-\MACHINE\obj\x86\Debug\ResolveAssemblyReference.cache
 K:\SIMPLC-\MACHINE\obj\x86\Debug\MACHINE.Properties.Resources.resources
 K:\SIMPLC-\MACHINE\obj\x86\Debug\GenerateResource.read.1.tlog
 K:\SIMPLC-\MACHINE\obj\x86\Debug\GenerateResource.write.1.tlog
-K:\SIMPLC-\MACHINE\bin\Debug\MACHINE.dll
-K:\SIMPLC-\MACHINE\bin\Debug\MACHINE.pdb
 K:\SIMPLC-\MACHINE\obj\x86\Debug\MACHINE.dll
 K:\SIMPLC-\MACHINE\obj\x86\Debug\MACHINE.pdb

@@ -49,10 +49,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CPU.cs" />
-    <Compile Include="GRAPHICS.cs" />
-    <Compile Include="MEMORY.cs" />
+    <Compile Include="CPU\CPU.cs" />
+    <Compile Include="CPU\MNEMONICS.cs" />
+    <Compile Include="GPU\GPU.cs" />
+    <Compile Include="MEMORY\MEMORY.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CPU\REGISTERS.cs" />
+    <Compile Include="Settings.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -62,6 +65,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -71,6 +75,12 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DEBUG\DEBUG.csproj">
+      <Project>{D897AF19-D7E8-4B2C-BDFD-039702CC3B05}</Project>
+      <Name>DEBUG</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using MACHINE.CPU;
+using MACHINE.MEM;
 
-namespace MACHINE
+namespace MACHINE.GPU
 {
-	static class GRAPHICS
+	static class GPU
 	{
 		private static ushort _LOCATION = 0xA000;
 		private static ushort _SIZE = 0x2000;
@@ -29,8 +31,8 @@ namespace MACHINE
 		public static void CLEAR( byte Character, byte Attribute )
 		{
 			for (
-						 ushort i = GRAPHICS.LOCATION;
-						 i < ( GRAPHICS.LOCATION + GRAPHICS.SIZE );
+						 ushort i = GPU.LOCATION;
+						 i < ( GPU.LOCATION + GPU.SIZE );
 						 i += 2 )
 			{
 				//Clear the screen
@@ -48,7 +50,7 @@ namespace MACHINE
 		{
 			ushort MEMLOC;
 
-			MEMLOC = GRAPHICS.TRANSLATE(Address);
+			MEMLOC = GPU.TRANSLATE(Address);
 			INSERT(Value, MEMLOC);
 		}
 
@@ -61,8 +63,8 @@ namespace MACHINE
 		{
 			ushort MEMLOC;
 
-			MEMLOC = GRAPHICS.TRANSLATE(Address);
-			return GRAPHICS.EXTRACT(Address);
+			MEMLOC = GPU.TRANSLATE(Address);
+			return GPU.EXTRACT(Address);
 
 		}
 
@@ -75,7 +77,7 @@ namespace MACHINE
 		private static void INSERT( byte VALUE, ushort MEMLOC )
 		{
 			if (
-				ISBOUND(MEMLOC) )
+				!ISBOUND(MEMLOC) )
 			{
 				return;
 			}
@@ -93,8 +95,8 @@ namespace MACHINE
 		/// <returns>Returns true if it is within the bounds, otherwise false.</returns>
 		public static bool ISBOUND( ushort Address )
 		{
-			return Address < GRAPHICS.LOCATION ||
-							Address > GRAPHICS.TRANSLATE(GRAPHICS.SIZE);
+			return Address < GPU.LOCATION ||
+							Address > GPU.TRANSLATE(GPU.SIZE);
 		}
 
 		/// <summary>
@@ -104,7 +106,7 @@ namespace MACHINE
 		/// <returns>The value contained at the location of MEMLOC</returns>
 		private static byte EXTRACT( ushort MEMLOC )
 		{
-			if ( GRAPHICS.ISBOUND(MEMLOC) )
+			if ( GPU.ISBOUND(MEMLOC) )
 			{
 				return MEMORY.MAIN[MEMLOC];
 			}
@@ -122,7 +124,7 @@ namespace MACHINE
 		/// <returns></returns>
 		public static ushort TRANSLATE( ushort LocalAddress )
 		{
-			return (ushort) ( GRAPHICS.LOCATION + LocalAddress );
+			return (ushort) ( GPU.LOCATION + LocalAddress );
 		}
 
 		/// <summary>
@@ -133,7 +135,7 @@ namespace MACHINE
 		{
 			get
 			{
-				return GRAPHICS._LOCATION;
+				return GPU._LOCATION;
 			}
 		}
 		/// <summary>
@@ -144,7 +146,7 @@ namespace MACHINE
 		{
 			get
 			{
-				return GRAPHICS._SIZE;
+				return GPU._SIZE;
 			}
 		}
 	}

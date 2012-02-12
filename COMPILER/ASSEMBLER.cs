@@ -9,8 +9,8 @@ namespace SIMPLC_
 {
 	class ASSEMBLER
 	{
-		private static char[] MAGIC_HEADER = new char[] { 'B', '3', '2' };
-		private static ushort MAGIC_START = Convert.ToUInt16("1000", 16);
+		private static char[] MAGIC_HEADER = new char[] { 'S', 'I', 'M', 'P', 'L', 'C', '-'};
+		private static ushort MAGIC_START = Convert.ToUInt16("8193", 16);
 		private static string MAGIC_FILE_IN = "IN.ASM";
 		private static string MAGIC_FILE_OUT = "out.b32";
 
@@ -35,6 +35,11 @@ namespace SIMPLC_
 		{
 			get
 			{
+				if ( ASSEMBLER.__DEBUG )
+				{
+					Console.WriteLine("Accessed:\t{0}\t{1}", this.Source[this.CurrentNdx], this.CurrentNdx);
+				}
+
 				return this.Source[this.CurrentNdx];
 			}
 		}
@@ -43,14 +48,14 @@ namespace SIMPLC_
 
 		public ASSEMBLER(
 			string infile, 
-			string outfile, 
+			string outfile,
 			string startADDR,
 			bool __DEBUG )
 		{
 			ASSEMBLER.__DEBUG = __DEBUG;
 			infile = __DEBUG ? ASSEMBLER.MAGIC_FILE_IN : infile;
 			outfile = __DEBUG ? ASSEMBLER.MAGIC_FILE_OUT : infile;
-			startADDR = __DEBUG ? "1000" : startADDR;
+			startADDR = __DEBUG ? "8193" : startADDR;
 
 			this.output = new BinaryWriter(File.Create(outfile));
 			this.LabelTable = new Hashtable( );
@@ -148,13 +153,42 @@ namespace SIMPLC_
 				case E_MNEMONIC.STA:
 					this.STA(isLabelScan);
 					break;
-				case E_MNEMONIC.END:
-					this.END(isLabelScan);
-					break;
 				case E_MNEMONIC.ADD:
 					this.ADD(isLabelScan);
 					break;
+				case E_MNEMONIC.CMPA:
+					this.CMPA(isLabelScan);
+					break;
+				case E_MNEMONIC.CMPB:
+					this.CMPB(isLabelScan);
+					break;
+				case E_MNEMONIC.CMPD:
+					this.CMPD(isLabelScan);
+					break;
+				case E_MNEMONIC.CMPX:
+					this.CMPX(isLabelScan);
+					break;
+				case E_MNEMONIC.CMPY:
+					this.CMPY(isLabelScan);
+					break;
+				case E_MNEMONIC.JEQ:
+					this.JEQ(isLabelScan);
+					break;
+				case E_MNEMONIC.JGT:
+					this.JGT(isLabelScan);
+					break;
+				case E_MNEMONIC.JLT:
+					this.JLT(isLabelScan);
+					break;
+				case E_MNEMONIC.JMP:
+					this.JMP(isLabelScan);
+					break;
+				case E_MNEMONIC.JNE:
+					this.JNE(isLabelScan);
+					break;
+				case E_MNEMONIC.END:
 				default:
+					this.END(isLabelScan);
 					break;
 			}
 
@@ -169,6 +203,66 @@ namespace SIMPLC_
 		#endregion
 
 		#region Mnemonics
+
+		private void JNE( bool isLabelScan )
+		{
+			this.EatWhiteSpaces( );
+			this.JMP_Helper(isLabelScan, C_MNEMONIC_VAL.JNE, 3);
+		}
+
+		private void JMP( bool isLabelScan )
+		{
+			this.EatWhiteSpaces( );
+			this.JMP_Helper(isLabelScan, C_MNEMONIC_VAL.JMP, 3);
+		}
+
+		private void JLT( bool isLabelScan )
+		{
+			this.EatWhiteSpaces( );
+			this.JMP_Helper(isLabelScan, C_MNEMONIC_VAL.JLT, 3);
+		}
+
+		private void JGT( bool isLabelScan )
+		{
+			this.EatWhiteSpaces( );
+			this.JMP_Helper(isLabelScan, C_MNEMONIC_VAL.JGT, 3);
+		}
+
+		private void JEQ( bool isLabelScan )
+		{
+			this.EatWhiteSpaces( );
+			this.JMP_Helper(isLabelScan, C_MNEMONIC_VAL.JEQ, 3);
+		}
+
+		private void CMPY( bool isLabelScan )
+		{
+			this.EatWhiteSpaces( );
+			this.CMP_Helper(isLabelScan, C_MNEMONIC_VAL.CMPY, 3);
+		}
+
+		private void CMPX( bool isLabelScan )
+		{
+			this.EatWhiteSpaces( );
+			CMP_Helper(isLabelScan, C_MNEMONIC_VAL.CMPX, 3);
+		}
+
+		private void CMPD( bool isLabelScan )
+		{
+			this.EatWhiteSpaces( );
+			this.CMP_Helper(isLabelScan, C_MNEMONIC_VAL.CMPD, 3);
+		}
+
+		private void CMPB( bool isLabelScan )
+		{
+			this.EatWhiteSpaces( );
+			this.CMP_Helper(isLabelScan, C_MNEMONIC_VAL.CMPB, 2);
+		}
+
+		private void CMPA( bool isLabelScan )
+		{
+			this.EatWhiteSpaces( );
+			this.CMP_Helper(isLabelScan, C_MNEMONIC_VAL.CMPA, 2);
+		}
 
 		/// <summary>
 		/// End function and set execution at LABEL
@@ -305,6 +399,45 @@ namespace SIMPLC_
 
 		#endregion
 
+		#region Helper functions
+		private void JMP_Helper( bool isLabelScan, byte MNE, ushort length )
+		{
+			if ( this.CurrentChr == '#' )
+			{
+				this.CurrentNdx++;
+
+				this.AsLength += length;
+
+				if ( isLabelScan )
+					return;
+
+				ushort val = this.ReadWordValue( );
+
+				if ( !isLabelScan )
+				{
+					this.output.Write(MNE);
+					this.output.Write(val);
+				}
+			}
+		}
+		private void CMP_Helper( bool isLabelScan, byte MNE, ushort length )
+		{
+			if ( this.CurrentChr == '#' )
+			{
+				this.CurrentNdx++;
+				byte val = this.ReadByteValue( );
+
+				this.AsLength += length;
+
+				if ( !isLabelScan )
+				{
+					this.output.Write(MNE);
+					this.output.Write(val);
+				}
+			}
+		}
+		#endregion
+
 		#region Util methods
 		private void DoEnd( bool isLabelScan )
 		{
@@ -332,6 +465,13 @@ namespace SIMPLC_
 			{
 				this.CurrentNdx++;
 				isHex = true;
+			}
+
+			else
+			if ( char.IsLetter(this.CurrentChr) )
+			{
+				val = (ushort) this.LabelTable[this.GetLabelName( )];
+				return val;
 			}
 
 			while ( char.IsLetterOrDigit(this.CurrentChr) )

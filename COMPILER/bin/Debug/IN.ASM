@@ -1,11 +1,10 @@
-﻿START
- LDA #65
+﻿START:
  LDX #$A000
- STA ,X
- END PUTA
-
-PUTA
+ JMP #PUTA
+PUTA:
  LDA #65
- LDX #$A000
  STA ,X
+ JMP #End
+End:
  END START
+ 

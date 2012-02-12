@@ -1,0 +1,5 @@
+K:\SIMPLC-\DEBUG\bin\Debug\DEBUG.dll
+K:\SIMPLC-\DEBUG\bin\Debug\DEBUG.pdb
+K:\SIMPLC-\DEBUG\obj\Debug\ResolveAssemblyReference.cache
+K:\SIMPLC-\DEBUG\obj\Debug\DEBUG.dll
+K:\SIMPLC-\DEBUG\obj\Debug\DEBUG.pdb

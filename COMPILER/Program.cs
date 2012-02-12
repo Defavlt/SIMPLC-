@@ -10,15 +10,15 @@ namespace SIMPLC_
     {
         static void Main(string[] args)
         {
-			if ( args.Length == 3 )
-			{
+			if ( args.Length == 3 || true )
+			{/*
 				string
 					source = args[0],
 					output = args[1],
 					origin = args[2];
 
 				FileStream fileReader = File.OpenRead(source);
-				FileStream fileWriter = File.OpenWrite(output);
+				FileStream fileWriter = File.OpenWrite(output);*/
 
 				new ASSEMBLER(null, null, null, true);
 			}
