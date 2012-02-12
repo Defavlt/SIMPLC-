@@ -1,29 +1,59 @@
 ** SIMPLC# **
 ** SIMPLC- **
 
+1. What is SIMPLC-?
+
+SIMPLC- is going to be a simple virtual machine, 
+with 64K memory*, 8192K memory dedicated to graphics,
+2 regular registers and 1 special register (memory-pointer).
+
+2. How do you use it?
+
+	A. Compile it
+	B. Write program (see sample, IN.ASM)
+	C. Process it with COMPILER
+	D. Start machine (this is not possible at the moment)
+	E. Load binary file (produced by C.)
+	F. ???
+	G. Profit.
+
 TODO:
-	README:
-	- Add syntax rules for project (in this file)
-	- Add requirement for adding new patches in this file (README), see below.
-	- Start ninj.. err, writing code.
-	
-Syntax:
 
-Patches:
-	README:
-	- DO NOT ADD FOR THIS FILE
-	Project:
-	- 120208: Marcus
-	- 120209: Marcus
+	* Create master project (an executable)
+	  for handling of run-time switches
+	  and the machine in general
+	  (this will probably also handle compiling,
+	  using a switch).
+	  
+	  Also, switch syntax should be something simple,
+	  like what 'yum' or 'apt-get' uses, e.g.:
+	  
+	  simplc compile @file
+	  simplc run @bootloader
+	  simplc recompile
+	  etc.
 	
-Notes:
-
-	120209: Marcus:
-		Added files 
-			-Assembly
-			-MNEMONICS
-			-REGISTERS
-		TODO:
-		* Unbreak build (No, I'm serious).
-		* Re-structure and -factor.
-		* Clean up in syntax and among redudant and/or useless methods.
+	* Implement proper handling of comments in source files
+	  when compiling, e.g.:
+	  
+	  ; This is a comment, and is ignored!
+	  
+	  START
+	   LDA #20
+	   LDX #$A000
+	   STA ,X
+	   END START
+	  ; This is also a comment! \o/
+	  
+	* Implement a proper MOV mnemonic, e.g.:
+	
+	  MOV VALUE, REGISTER
+	  
+	  So we don't have to have one mnemonic for each register.
+	  
+	* Create 'hardware' for the machine to use, e.g.:
+	
+	  SCREEN,
+	  MOUSE,
+	  KEYBOARD,
+	  PRINTER(?)
