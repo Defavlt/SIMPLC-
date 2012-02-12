@@ -1,0 +1,7 @@
+## Project files
+*.sln
+*.suo
+*.csproj
+bin
+obj
+Properties
