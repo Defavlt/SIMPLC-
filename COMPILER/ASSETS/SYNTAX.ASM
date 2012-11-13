@@ -1,8 +1,4 @@
-﻿START
- LDA 63 12
- STA X
-
-; Video memory starts at
+﻿; Video memory starts at
 ; address 4096, and ends at
 ; address 8192
 
